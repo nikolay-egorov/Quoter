@@ -42,22 +42,21 @@ function displayQuote(quote) {
 }
 
 
-function drawImageScaled(x, y, fullwidth) {
+function drawImageScaled(image, x, y, fullwidth) {
     // use context.height and context.width to draw a fullscreen
     // var w_sample = w_sample;
     // if (fullwidth){
     //     w_sample = globalWidth;
     // }
     var context = document.getElementById("title_canvas").getContext("2d");
-    var hRatio = w_sample / this.width;
-    var vRatio = h_sample / this.height;
+    var hRatio = w_sample / image.width;
+    var vRatio = h_sample / image.height;
     var ratio = Math.min(hRatio, vRatio);
-    var centerShift_x = (w_sample - this.width * ratio) / 2;
-    var centerShift_y = (h_sample - this.height * ratio) / 2;
-    // context.clearRect(x, y, w_sample, h_sample);
-    context.drawImage(this, x, y, this.width, this.height,
-        centerShift_x, centerShift_y, this.width * ratio, this.height * ratio);
-
+    var centerShift_x = (w_sample - image.width * ratio) / 2;
+    var centerShift_y = (h_sample - image.height * ratio) / 2;
+    context.clearRect(x, y, image.width * ratio, image.height * ratio);
+    context.drawImage(image, x, y,
+         image.width * ratio, image.height * ratio);
 }
 
 
@@ -172,10 +171,9 @@ function drawImgFromUnsplash(src, x, y, fullwidth) {
     //     var context = canvas.getContext("2d");
     //     drawImageScaled(context,this,x,y,fullwidth);
     // }, false);
+
+    image.onload = drawImageScaled.bind(null, image, x, y, fullwidth);
     image.src = src;
-    image.onload = drawImageScaled.bind(image, x, y,fullwidth);
-
-
 }
 
 // const newQuoteButton = document.querySelector('.new-quote');
@@ -229,14 +227,14 @@ function getLines(context, text, x, y, maxWidth, lineHeight) {
         }
     }
 }
-
-var x = 0, y = 0;
-
-drawImgFromUnsplash("https://source.unsplash.com/400x300?sig=" + Math.random(), x, y, 0);
-x -= w_sample;
-drawImgFromUnsplash("https://source.unsplash.com/400x300?sig=" + Math.random(), x - w_sample, y, 0);
+f();
 
 // randomUnsplash();
+function f() {
+    var x = 0, y = 0;
+    drawImgFromUnsplash("https://source.unsplash.com/400x300?sig=" + Math.random(), x, y, 0);
+    drawImgFromUnsplash("https://source.unsplash.com/400x300?sig=" + Math.random(), x+w_sample, y, 0);
+}
 
 // text = 'Antidisestablishmentarianism dictum feugiat nisl ut dapibus. Mauris iaculis porttitor posuere. Praesent id metus massa, ut antidisestablishmentarianism odio. Proin quis tortor orci. Etiam at risus et  justo dignissim congue. Donec congue lacinia dui, a porttitor lectus condimentum  laoreet. Nunc eu antidisestablishmentarianism orci. Quisque eget odio ac lectus vestibulum faucibus  eget in metus. In pellentesque faucibus vestibulum. Nulla at nulla justo, eget luctus  tortor. Nulla facilisi. Duis aliquet egestas purus in blandit. Curabitur vulputate.';
 // var quoteText = document.getElementById('title_canvas');
