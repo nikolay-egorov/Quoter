@@ -118,54 +118,105 @@ function drawImgFromUnsplash(src, x, y, fullwidth) {
     image.src = src;
 }
 
+function setWords(context, text, font, x,y, lineHeight ) {
+    context.font = font + 'px serif';
+    let r = wrapWords(context,text,x);
+    renderWordWrapRows(document.getElementById("title_canvas").getContext("2d"),r,lineHeight,y,x);
+}
 
-// function  wrapWords(context,obj) {
-// 	var words = obj.text.split(/ /);
-//     var rowWords = [];
-//     var rows = [];
-//     words.forEach(function(word) {
-//       var rowWidth = calcRowWidth(context, obj, rowWords.concat(word).join(' '));
-//       if (rowWidth >= context.canvas.width && rowWords.length > 0) {
-//         rows.push(rowWords.join(' '));
-//         rowWords = [];
-//       }
-//       rowWords.push(word);
-//     });
-//     if (rowWords.length > 0) {
-//       rows.push(rowWords.join(' '));
-//     }
-//     return rows;
-//   }
+function renderWordWrapRows(context,rows,lineHeight,paddingtop, paddingleft) {
+    let rowX = globalWidth / 3 - paddingleft*2;
+    let rowY = paddingtop;
+    let i=0;
+    let prevSize = rows[i].length;
+    context.align = 'center';
+    let currSize ;
+    let diff = 0;
+    context.textAlign = "center";
+    rows.forEach(function(row) {
+        currSize = row.length;
+        if (row.length === 1){
+            context.fillText(row, context.canvas.width/2, rowY   );
+        }
+        else {
+            // if (prevSize !== currSize && i>0) {
+            //     diff = context.measureText(row.split(/ /).slice(0, Math.abs(currSize - prevSize)));
+            //     if (currSize > prevSize && diff)
+            //         diff *= -1;
+            // }
+            // else diff =0;
+            context.fillText(row, rowX + diff, rowY   );
+        }
+        rowY  += lineHeight;
+        i++;
+        prevSize = currSize;
+    });
+}
+
+
+function  wrapWords(context,text,paddingleft) {
+	var words = text.split(/ /);
+    var rowWords = [];
+    var rows = [];
+    words.forEach(function(word) {
+      let rowWidth = context.measureText(rowWords.concat(word).join(' ')).width  + paddingleft;
+      if (rowWidth + paddingleft*2 >= globalWidth/2 && rowWords.length > 0) {
+        rows.push(rowWords.join(' '));
+        rowWords = [];
+      }
+      rowWords.push(word);
+    });
+    if (rowWords.length > 0) {
+      rows.push(rowWords.join(' '));
+    }
+    return rows;
+  }
 
 //text drawing tool
 function getLines(context, text, font, x, y,  maxWidth, lineHeight) {
-    let line = '', lineCount = 0;
     context.font = font + 'px serif';
-    for (i = 0; i < text.length; i++) {
-        test = text[i];
-        metrics = context.measureText(test);
-        while (metrics.width > maxWidth) {
-            // Determine how much of the word will fit
-            test = test.substring(0, test.length - 1);
-            metrics = context.measureText(test);
-        }
-        if (text[i] != test) {
-            text.splice(i + 1, 0, text[i].substr(test.length));
-            text[i] = test;
-        }
-
-        test = line + text[i] + ' ';
-        metrics = context.measureText(test);
-
-        if (metrics.width > maxWidth && i > 0) {
+    var words = text.split(" ");
+    var countWords = words.length;
+    var line = '';
+    for (var n = 0; n < countWords; n++) {
+        var testLine = line + words[n] + ' ';
+        var testWidth = context.measureText(testLine).width;
+        if (testWidth > maxWidth) {
             context.fillText(line, x, y);
-            line = text[i] + ' ';
+            line = words[n] + " ";
             y += lineHeight;
-            lineCount++;
-        } else {
-            line = test;
+        }
+        else {
+            line = testLine;
         }
     }
+    context.fillText(line, marginLeft, marginTop);
+
+    // for (i = 0; i < text.length; i++) {
+    //     test = text[i];
+    //     metrics = context.measureText(test);
+    //     while (metrics.width > maxWidth) {
+    //         // Determine how much of the word will fit
+    //         test = test.substring(0, test.length - 1);
+    //         metrics = context.measureText(test);
+    //     }
+    //     if (text[i] != test) {
+    //         text.splice(i + 1, 0, text[i].substr(test.length));
+    //         text[i] = test;
+    //     }
+    //
+    //     test = line + text[i] + ' ';
+    //     metrics = context.measureText(test);
+    //
+    //     if (metrics.width > maxWidth && i > 0) {
+    //         context.fillText(line, x, y);
+    //         line = text[i] + ' ';
+    //         y += lineHeight;
+    //         lineCount++;
+    //     } else {
+    //         line = test;
+    //     }
+    // }
 }
 
 initHTML();
@@ -200,7 +251,8 @@ async function getQuote() {
     const proxyurl = "https://cors-anywhere.herokuapp.com/";
     const response = await  fetch(proxyurl + endpoint2);
     const data = await response.json();
-    getLines(document.getElementById("title_canvas").getContext("2d"),data.quoteText,18,0 + 100,0 + 200,globalWidth,100);
+    // getLines(document.getElementById("title_canvas").getContext("2d"),data.quoteText,18,0 + 100,0 + 100,500,20);
+    setWords(document.getElementById("title_canvas").getContext("2d"),data.quoteText,30,20,0 +200,40);
     return data.quoteText;
 }
 // var x = 0, y = 0;
