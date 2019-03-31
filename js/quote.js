@@ -1,7 +1,3 @@
-// var canvas = document.getElementById("title_canvas"),
-// context = canvas.getContext("2d");
-
-
 // function displayQuote(quote) {
 //   const quoteText = document.querySelector('.title_canvas');
 //   // quoteText.textContent = quote;
@@ -14,13 +10,64 @@
 // getQuote();
 
 var endpoint = 'https://api.whatdoestrumpthink.com/api/v1/quotes/random';
-var canvas = document.getElementById("title_canvas");
-canvas.setAttribute('width', 700);
-canvas.setAttribute('height', 700);
-var w_sample = canvas.width / 2 >> 0;
-var h_sample = canvas.height / 3 >> 0;
-var globalWidth = canvas.width;
 
+
+
+function initHTML() {
+    // document.body.innerHTML ='<canvas id="title_canvas" >'+
+    //     ' \n' +
+    //     '</canvas>';
+    document.writeln('<canvas id="title_canvas" >'+
+        ' \n' +
+        '</canvas>');
+    var button = document.createElement("button");
+    button.innerHTML = "New collage";
+    button.setAttribute('align', 'bottom');
+    button.setAttribute('style', 'position: relative; bottom: 0;');
+    var body = document.getElementsByTagName("body")[0];
+    body.appendChild(button);
+
+    button.addEventListener ("click", function() {
+        buildCollage();
+    });
+
+    button =  document.createElement("button");
+    button.innerHTML = "Save";
+    body.appendChild(button);
+
+    button.addEventListener ("click", function() {
+        var link = document.createElement('a');
+        link.download = "collage" + Math.random()%100 + ".png" ;
+        link.href = saveCanvas();
+        document.body.appendChild( link );
+        link.click();
+        document.body.removeChild( link );
+    });
+}
+
+function saveCanvas() {
+    if (canvas.getContext("2d")) {
+        return canvas.toDataURL('image/png').replace(/^data:image\/[^;]/, 'data:application/octet-stream');
+    }
+}
+
+function download(blob, filename) {
+    var file = new Blob([data], {type: type});
+    if (window.navigator.msSaveOrOpenBlob) // IE10+
+        window.navigator.msSaveOrOpenBlob(blob, filename);
+    else { // Others
+        var a = document.createElement("a"),
+            url = URL.createObjectURL(blob);
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function() {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }, 0);
+    }
+}
 
 function getQuote() {
     fetch(endpoint)
@@ -110,44 +157,6 @@ function buildCollage() {
 }
 
 
-function setRows(images) {
-
-    var rows = [];
-    var rowWidths = [];
-    var tempWidth = 0;
-    var rowCount = 0;
-    rows[rowCount] = [];
-
-    for (var i = 0; i < images.length; i++) {
-
-        var photo = images[i];
-        // keep track of a 'row' by summing the scaled widths until we cross the max width
-        // calculate scaled width given target height
-        var scaledWidth = scaleWidth(photo);
-        tempWidth += scaledWidth;
-        if (tempWidth < globalWidth) {
-            rows[rowCount].push(photo);
-            rowWidths[rowCount] = tempWidth;
-
-        } else {
-            rowCount++;
-            tempWidth = scaledWidth;
-            rows[rowCount] = [];
-            rows[rowCount].push(photo);
-            rowWidths[rowCount] = tempWidth;
-        }
-    }
-
-    // we handle special case where we have 1 left in last row
-    if (rows[rowCount].length === 1 && rowCount > 0) {
-        rows[rowCount - 1].push(photo);
-        rowWidths[rowCount - 1] += scaleWidth(photo);
-        rows.pop();
-        rowWidths.pop();
-    }
-    return {rows: rows, rowWidths: rowWidths};
-}
-
 function scaleWidth(img) {
     return w_sample / img.width;
 }
@@ -155,6 +164,7 @@ function scaleWidth(img) {
 
 function drawImgFromUnsplash(src, x, y, fullwidth) {
     var image = new Image();
+    image.crossOrigin = 'anonymous';
     image.onload = drawImageScaled.bind( image, x, y, fullwidth);
     image.src = src;
 }
@@ -211,7 +221,14 @@ function getLines(context, text, x, y, maxWidth, lineHeight) {
     }
 }
 
-buildCollage();
+initHTML();
+
+var canvas = document.getElementById("title_canvas");
+canvas.setAttribute('width', 700);
+canvas.setAttribute('height', 700);
+var w_sample = canvas.width / 2 >> 0;
+var h_sample = canvas.height / 3 >> 0;
+var globalWidth = canvas.width;
 // var x = 0, y = 0;
 // drawImgFromUnsplash("https://source.unsplash.com/400x400?sig=" + Math.random(), x, y, 0);
 // drawImgFromUnsplash("https://source.unsplash.com/400x400?sig=" + Math.random(), x+w_sample, y, 0);
