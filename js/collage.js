@@ -11,7 +11,8 @@
 let seed = 3123;
 function random() {
     let x = Math.sin(seed++) * 10000;
-    return x - Math.floor(x);
+    seed+=50;
+    return x - (x>>0);
 }
 
 
@@ -44,7 +45,7 @@ function initHTML() {
 
     button.addEventListener ("click", function() {
         let link = document.createElement('a');
-        link.download = "collage" + Math.random()%100 + ".png" ;
+        link.download = "collage" + Math.random()* (9) + 1 + ".png" ;
         link.href = saveCanvas();
         document.body.appendChild( link );
         link.click();
@@ -88,7 +89,7 @@ function delay() {
 	Collage section setup
 */
 async function buildCollage() {
-    document.getElementById("title_canvas").getContext("2d").clearRect(0, 0,globalWidth,document.getElementById("title_canvas").getContext("2d").height);
+    document.getElementById("title_canvas").getContext("2d").clearRect(0, 0, globalWidth, globalHeigth);
     let numImages = 5;
     // let src = "https://source.unsplash.com/400x300?sig=";
     let src = "https://source.unsplash.com/collection/789734/400x300?sig=";
@@ -100,7 +101,7 @@ async function buildCollage() {
             //     .then(function (response) {
             //        drawImgFromUnsplash(response.url, x, y, 0);
             //     });
-            drawImgFromUnsplash(src + random()*i, x, y, 0);
+            drawImgFromUnsplash(src + random()*12, x, y, 0);
             await delay();
             x += w_sample;
         } else {
@@ -119,7 +120,6 @@ async function buildCollage() {
                 drawImgFromUnsplash(src+ random()*i, x, y, 1);
                 break;
             }
-
             drawImgFromUnsplash(src+ random()*i, x, y, 0);
             await delay();
             // await delay();
@@ -145,18 +145,19 @@ function setWords(context, text, font, x,y, lineHeight ) {
 }
 
 function renderWordWrapRows(context,rows,lineHeight,paddingtop ) {
+    let rowY = (context.canvas.height - rows.length - paddingtop) /2;
+    if(rows.length >7)
+        rowY =  paddingtop;
+    else if (rows.length >= 11)
+        rowY = 60;
     let rowX = globalWidth / 2  ;
-    // let rowY = (context.canvas.height - rows.length - paddingtop) /2;
-    let rowY = paddingtop;
     context.textBaseline = 'middle';
     context.textAlign = "center";
     rows.forEach(function(row) {
         if (row.length === 1){
             context.fillText(row, context.canvas.width/2, rowY   );
         }
-        else {
-            context.fillText(row, rowX , rowY   );
-        }
+        else context.fillText(row, rowX , rowY   );
         rowY  += lineHeight;
     });
 }
@@ -168,7 +169,7 @@ function  wrapWords(context,text,paddingleft) {
     let rows = [];
     words.forEach(function(word) {
       let rowWidth = context.measureText(rowWords.concat(word).join(' ')).width  + paddingleft;
-      if (rowWidth + paddingleft*2 >= globalWidth/1.4 && rowWords.length > 0) {
+      if (rowWidth + paddingleft*2 >= globalWidth/1.1 && rowWords.length > 0) {
         rows.push(rowWords.join(' '));
         rowWords = [];
       }
@@ -184,7 +185,7 @@ initHTML();
 const w_sample = document.getElementById("title_canvas").width / 2 >> 0;
 const h_sample = document.getElementById("title_canvas").height / 3 >> 0;
 const globalWidth = document.getElementById("title_canvas").width;
-
+const globalHeigth = document.getElementById("title_canvas").height;
 
 let text = '';
 
@@ -199,7 +200,7 @@ async function getQuote() {
     const response = await  fetch(proxyurl + endpoint2);
     const data = await response.json();
     // getLines(document.getElementById("title_canvas").getContext("2d"),data.quoteText,18,0 + 100,0 + 100,500,20);
-    setWords(document.getElementById("title_canvas").getContext("2d"),data.quoteText,50,20,220,40);
+    setWords(document.getElementById("title_canvas").getContext("2d"),data.quoteText,50,20,170,40);
     // return data.quoteText;
 }
 
