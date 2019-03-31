@@ -10,7 +10,7 @@
 // getQuote();
 let seed = 3123;
 function random() {
-    let x = Math.sin(seed++) * 10000;
+    let x = Math.sin(++seed) * 10000;
     seed+=50;
     return x - (x>>0);
 }
@@ -45,11 +45,17 @@ function initHTML() {
 
     button.addEventListener ("click", function() {
         let link = document.createElement('a');
-        link.download = "collage" + Math.random()* (9) + 1 + ".png" ;
-        link.href = saveCanvas();
-        document.body.appendChild( link );
-        link.click();
-        document.body.removeChild( link );
+        if (canvas.msToBlob) { //for IE
+            let blob = canvas.msToBlob();
+            window.navigator.msSaveBlob(blob, "collage" + Math.random()* (9) + 1 + ".png" );
+        } else {
+            //other browsers
+            link.href = saveCanvas();
+            link.download = "collage" + Math.random()* (9) + 1 + ".png" ;
+            document.body.appendChild( link );
+            link.click();
+            document.body.removeChild( link );
+        }
     });
 }
 
@@ -57,6 +63,10 @@ function saveCanvas() {
     if (document.getElementById("title_canvas").getContext("2d")) {
         return document.getElementById("title_canvas").toDataURL('image/png').replace(/^data:image\/[^;]/, 'data:application/octet-stream');
     }
+}
+
+function saveAS(){
+
 }
 
 async function clickGet() {
@@ -108,10 +118,6 @@ async function buildCollage() {
             x = 0;
             y += h_sample;
             if (i === numImages  ) {
-                // fetch(src + Math.random()
-                // ).then(function (response) {
-                //     return response.blob();
-                // }
                 //     .then(function (data) {
                 //         var base64img = URL.createObjectURL(data);
                 //         drawImgFromUnsplash(context, images[i], base64img, x, y, 1)
@@ -146,12 +152,12 @@ function setWords(context, text, font, x,y, lineHeight ) {
 
 function renderWordWrapRows(context,rows,lineHeight,paddingtop ) {
     let rowY = (context.canvas.height - rows.length - paddingtop) /2;
-    if(rows.length >7)
+    if(rows.length >= 7)
         rowY =  paddingtop;
-    else if (rows.length >= 11)
-        rowY = 60;
+    // else if (rows.length >= 11)
+    //     rowY = 60;
     let rowX = globalWidth / 2  ;
-    context.textBaseline = 'middle';
+    context.textBaseline = 'top';
     context.textAlign = "center";
     rows.forEach(function(row) {
         if (row.length === 1){
