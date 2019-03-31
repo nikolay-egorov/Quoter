@@ -47,7 +47,7 @@ function initHTML() {
         let link = document.createElement('a');
         if (canvas.msToBlob) { //for IE
             let blob = canvas.msToBlob();
-            window.navigator.msSaveBlob(blob, "collage" + Math.random()* (9) + 1 + ".png" );
+            window.navigator.msSaveBlob(blob, "collage" + (( Math.random()* (9) + 1)>>0) + ".png" );
         } else {
             //other browsers
             link.href = saveCanvas();
