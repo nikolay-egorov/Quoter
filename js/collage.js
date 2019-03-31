@@ -31,7 +31,7 @@ function initHTML() {
     body.appendChild(button);
 
     button.addEventListener ("click", function() {
-        buildCollage();
+        clickGet();
     });
 
     button =  document.createElement("button");
@@ -49,11 +49,15 @@ function initHTML() {
 }
 
 function saveCanvas() {
-    if (canvas.getContext("2d")) {
-        return canvas.toDataURL('image/png').replace(/^data:image\/[^;]/, 'data:application/octet-stream');
+    if (document.getElementById("title_canvas").getContext("2d")) {
+        return document.getElementById("title_canvas").toDataURL('image/png').replace(/^data:image\/[^;]/, 'data:application/octet-stream');
     }
 }
 
+async function clickGet() {
+    await buildCollage();
+    getQuote();
+}
 
 function drawImageScaled(  x, y, fullwidth) {
     // use context.height and context.width to draw a fullscreen
@@ -68,23 +72,30 @@ function drawImageScaled(  x, y, fullwidth) {
     let ratio = Math.min(hRatio, vRatio);
     // var centerShift_x = (this.w_sample - this.width * ratio) / 2;
     // var centerShift_y = (h_sample - this.height * ratio) / 2;
-    context.clearRect(x, y, this.width * ratio, this.height * ratio);
+    context.clearRect(x, y, this.width * ratio, h_sample);
     context.drawImage(this, x, y,
         this.w_sample, h_sample);
 }
 
-
+function delay() {
+    return new Promise(resolve => setTimeout(resolve, 1300));
+}
 /*
 	Collage section setup
 */
-function buildCollage() {
-
+async function buildCollage() {
+    document.getElementById("title_canvas").getContext("2d").clearRect(0, 0,globalWidth,document.getElementById("title_canvas").getContext("2d").height);
     let numImages = 5;
     let src = "https://source.unsplash.com/400x300?sig=";
     let x = 0, y = 0;
+
     for (let i = 1; i <= numImages; i++) {
         if (x < globalWidth - 4) {
-            drawImgFromUnsplash(src+ Math.random()*i, x, y, 0);
+            fetch(src+ Math.random()*i)
+                .then(function (response) {
+                   drawImgFromUnsplash(response.url, x, y, 0);
+                });
+            await delay();
             x += w_sample;
         } else {
             x = 0;
@@ -98,11 +109,19 @@ function buildCollage() {
                 //         var base64img = URL.createObjectURL(data);
                 //         drawImgFromUnsplash(context, images[i], base64img, x, y, 1)
                 //     }));
-                drawImgFromUnsplash(src+ Math.random()*i, x, y, 1);
+                fetch(src+ Math.random()*i)
+                    .then(function (response) {
+                        drawImgFromUnsplash(response.url, x, y, 1);
+                    });
+                await delay();
                 // drawImgFromUnsplash(context,images[i],src + Math.random(),x,y,1);
                 break;
             }
-            drawImgFromUnsplash(src+ Math.random()*i, x, y, 0);
+            fetch(src+ Math.random()*i)
+                .then(function (response) {
+                    drawImgFromUnsplash(response.url, x, y, 0);
+                });
+            await delay();
             x += w_sample;
             // drawImgFromUnsplash(context,images[i],src + Math.random(),x,y,0);
         }
@@ -114,42 +133,30 @@ function buildCollage() {
 function drawImgFromUnsplash(src, x, y, fullwidth) {
     let image = new Image();
     image.crossOrigin = 'anonymous';
-    image.onload = drawImageScaled.bind( image, x, y, fullwidth);
+    image.onload =  drawImageScaled.bind( image, x, y, fullwidth);
     image.src = src;
 }
 
 function setWords(context, text, font, x,y, lineHeight ) {
     context.font = font + 'px serif';
+    context.fillStyle = "#FFFEF2";
     let r = wrapWords(context,text,x);
     renderWordWrapRows(document.getElementById("title_canvas").getContext("2d"),r,lineHeight,y,x);
 }
 
-function renderWordWrapRows(context,rows,lineHeight,paddingtop, paddingleft) {
-    let rowX = globalWidth / 3 - paddingleft*2;
+function renderWordWrapRows(context,rows,lineHeight,paddingtop ) {
+    let rowX = globalWidth / 2  ;
     let rowY = paddingtop;
-    let i=0;
-    let prevSize = rows[i].length;
     context.align = 'center';
-    let currSize ;
-    let diff = 0;
     context.textAlign = "center";
     rows.forEach(function(row) {
-        currSize = row.length;
         if (row.length === 1){
             context.fillText(row, context.canvas.width/2, rowY   );
         }
         else {
-            // if (prevSize !== currSize && i>0) {
-            //     diff = context.measureText(row.split(/ /).slice(0, Math.abs(currSize - prevSize)));
-            //     if (currSize > prevSize && diff)
-            //         diff *= -1;
-            // }
-            // else diff =0;
-            context.fillText(row, rowX + diff, rowY   );
+            context.fillText(row, rowX , rowY   );
         }
         rowY  += lineHeight;
-        i++;
-        prevSize = currSize;
     });
 }
 
@@ -226,14 +233,7 @@ const globalWidth = document.getElementById("title_canvas").width;
 
 
 let text = '';
-getQuote();
-// (async  => {
-//     text = getQuote();
-// })();
 
-// getQuote().then(data => {
-//    text = data.quoteText;
-// });
 // $.getScript("js/quote.js",function(){
 // //    text =getQuote();
 // // });
@@ -255,10 +255,7 @@ async function getQuote() {
     setWords(document.getElementById("title_canvas").getContext("2d"),data.quoteText,30,20,0 +200,40);
     return data.quoteText;
 }
-// var x = 0, y = 0;
-// drawImgFromUnsplash("https://source.unsplash.com/400x400?sig=" + Math.random(), x, y, 0);
-// drawImgFromUnsplash("https://source.unsplash.com/400x400?sig=" + Math.random(), x+w_sample, y, 0);
-// x=0;
+
 // y+=h_sample;
 // drawImgFromUnsplash("https://source.unsplash.com/400x400?sig=" + Math.random(), x, y, 0);
 // drawImgFromUnsplash("https://source.unsplash.com/400x400?sig=" + Math.random(), x, y+h_sample, 1);
