@@ -8,7 +8,11 @@
 // const newQuoteButton = document.querySelector('.new-quote  ');
 // // newQuoteButton.addEventListener('click', getQuote);
 // getQuote();
-
+let seed = 3123;
+function random() {
+    let x = Math.sin(seed++) * 10000;
+    return x - Math.floor(x);
+}
 
 
 
@@ -55,7 +59,7 @@ function saveCanvas() {
 }
 
 async function clickGet() {
-    await buildCollage();
+   await buildCollage();
     getQuote();
 }
 
@@ -78,7 +82,7 @@ function drawImageScaled(  x, y, fullwidth) {
 }
 
 function delay() {
-    return new Promise(resolve => setTimeout(resolve, 1300));
+    return new Promise(resolve => setTimeout(resolve, 1200));
 }
 /*
 	Collage section setup
@@ -86,15 +90,17 @@ function delay() {
 async function buildCollage() {
     document.getElementById("title_canvas").getContext("2d").clearRect(0, 0,globalWidth,document.getElementById("title_canvas").getContext("2d").height);
     let numImages = 5;
-    let src = "https://source.unsplash.com/400x300?sig=";
+    // let src = "https://source.unsplash.com/400x300?sig=";
+    let src = "https://source.unsplash.com/collection/789734/400x300?sig=";
     let x = 0, y = 0;
 
     for (let i = 1; i <= numImages; i++) {
         if (x < globalWidth - 4) {
-            fetch(src+ Math.random()*i)
-                .then(function (response) {
-                   drawImgFromUnsplash(response.url, x, y, 0);
-                });
+            // fetch(src+ Math.random()*i)
+            //     .then(function (response) {
+            //        drawImgFromUnsplash(response.url, x, y, 0);
+            //     });
+            drawImgFromUnsplash(src + random()*i, x, y, 0);
             await delay();
             x += w_sample;
         } else {
@@ -109,21 +115,15 @@ async function buildCollage() {
                 //         var base64img = URL.createObjectURL(data);
                 //         drawImgFromUnsplash(context, images[i], base64img, x, y, 1)
                 //     }));
-                fetch(src+ Math.random()*i)
-                    .then(function (response) {
-                        drawImgFromUnsplash(response.url, x, y, 1);
-                    });
-                await delay();
-                // drawImgFromUnsplash(context,images[i],src + Math.random(),x,y,1);
+                // await delay();
+                drawImgFromUnsplash(src+ random()*i, x, y, 1);
                 break;
             }
-            fetch(src+ Math.random()*i)
-                .then(function (response) {
-                    drawImgFromUnsplash(response.url, x, y, 0);
-                });
+
+            drawImgFromUnsplash(src+ random()*i, x, y, 0);
             await delay();
+            // await delay();
             x += w_sample;
-            // drawImgFromUnsplash(context,images[i],src + Math.random(),x,y,0);
         }
     }
 
@@ -138,16 +138,17 @@ function drawImgFromUnsplash(src, x, y, fullwidth) {
 }
 
 function setWords(context, text, font, x,y, lineHeight ) {
-    context.font = font + 'px serif';
-    context.fillStyle = "#FFFEF2";
+    context.font =font + 'px serif';
+    context.fillStyle = "#FFFFFF";
     let r = wrapWords(context,text,x);
     renderWordWrapRows(document.getElementById("title_canvas").getContext("2d"),r,lineHeight,y,x);
 }
 
 function renderWordWrapRows(context,rows,lineHeight,paddingtop ) {
     let rowX = globalWidth / 2  ;
+    // let rowY = (context.canvas.height - rows.length - paddingtop) /2;
     let rowY = paddingtop;
-    context.align = 'center';
+    context.textBaseline = 'middle';
     context.textAlign = "center";
     rows.forEach(function(row) {
         if (row.length === 1){
@@ -162,12 +163,12 @@ function renderWordWrapRows(context,rows,lineHeight,paddingtop ) {
 
 
 function  wrapWords(context,text,paddingleft) {
-	var words = text.split(/ /);
-    var rowWords = [];
-    var rows = [];
+	let words = text.split(/ /);
+    let rowWords = [];
+    let rows = [];
     words.forEach(function(word) {
       let rowWidth = context.measureText(rowWords.concat(word).join(' ')).width  + paddingleft;
-      if (rowWidth + paddingleft*2 >= globalWidth/2 && rowWords.length > 0) {
+      if (rowWidth + paddingleft*2 >= globalWidth/1.4 && rowWords.length > 0) {
         rows.push(rowWords.join(' '));
         rowWords = [];
       }
@@ -178,53 +179,6 @@ function  wrapWords(context,text,paddingleft) {
     }
     return rows;
   }
-
-//text drawing tool
-function getLines(context, text, font, x, y,  maxWidth, lineHeight) {
-    context.font = font + 'px serif';
-    var words = text.split(" ");
-    var countWords = words.length;
-    var line = '';
-    for (var n = 0; n < countWords; n++) {
-        var testLine = line + words[n] + ' ';
-        var testWidth = context.measureText(testLine).width;
-        if (testWidth > maxWidth) {
-            context.fillText(line, x, y);
-            line = words[n] + " ";
-            y += lineHeight;
-        }
-        else {
-            line = testLine;
-        }
-    }
-    context.fillText(line, marginLeft, marginTop);
-
-    // for (i = 0; i < text.length; i++) {
-    //     test = text[i];
-    //     metrics = context.measureText(test);
-    //     while (metrics.width > maxWidth) {
-    //         // Determine how much of the word will fit
-    //         test = test.substring(0, test.length - 1);
-    //         metrics = context.measureText(test);
-    //     }
-    //     if (text[i] != test) {
-    //         text.splice(i + 1, 0, text[i].substr(test.length));
-    //         text[i] = test;
-    //     }
-    //
-    //     test = line + text[i] + ' ';
-    //     metrics = context.measureText(test);
-    //
-    //     if (metrics.width > maxWidth && i > 0) {
-    //         context.fillText(line, x, y);
-    //         line = text[i] + ' ';
-    //         y += lineHeight;
-    //         lineCount++;
-    //     } else {
-    //         line = test;
-    //     }
-    // }
-}
 
 initHTML();
 const w_sample = document.getElementById("title_canvas").width / 2 >> 0;
@@ -238,13 +192,6 @@ let text = '';
 // //    text =getQuote();
 // // });
 
-// let canvas = document.getElementById("title_canvas");
-// canvas.setAttribute('width', 700);
-// canvas.setAttribute('height', 700);
-// let w_sample = canvas.width / 2 >> 0;
-// let h_sample = canvas.height / 3 >> 0;
-// let globalWidth = canvas.width;
-
 
 async function getQuote() {
     const endpoint2 = 'https://api.forismatic.com/api/1.0/?method=getQuote&lang=ru&format=json';
@@ -252,14 +199,9 @@ async function getQuote() {
     const response = await  fetch(proxyurl + endpoint2);
     const data = await response.json();
     // getLines(document.getElementById("title_canvas").getContext("2d"),data.quoteText,18,0 + 100,0 + 100,500,20);
-    setWords(document.getElementById("title_canvas").getContext("2d"),data.quoteText,30,20,0 +200,40);
-    return data.quoteText;
+    setWords(document.getElementById("title_canvas").getContext("2d"),data.quoteText,50,20,220,40);
+    // return data.quoteText;
 }
-
-// y+=h_sample;
-// drawImgFromUnsplash("https://source.unsplash.com/400x400?sig=" + Math.random(), x, y, 0);
-// drawImgFromUnsplash("https://source.unsplash.com/400x400?sig=" + Math.random(), x, y+h_sample, 1);
-// randomUnsplash();
 
 
  
