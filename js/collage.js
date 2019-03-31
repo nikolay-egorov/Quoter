@@ -20,6 +20,9 @@ function initHTML() {
     document.writeln('<canvas id="title_canvas" >'+
         ' \n' +
         '</canvas>');
+    let canvas = document.getElementById("title_canvas");
+    canvas.setAttribute('width', 700);
+    canvas.setAttribute('height', 700);
     let button = document.createElement("button");
     button.innerHTML = "New collage";
     button.setAttribute('align', 'bottom');
@@ -135,8 +138,9 @@ function drawImgFromUnsplash(src, x, y, fullwidth) {
 //   }
 
 //text drawing tool
-function getLines(context, text, x, y, maxWidth, lineHeight) {
+function getLines(context, text, font, x, y,  maxWidth, lineHeight) {
     let line = '', lineCount = 0;
+    context.font = font + 'px serif';
     for (i = 0; i < text.length; i++) {
         test = text[i];
         metrics = context.measureText(test);
@@ -165,22 +169,40 @@ function getLines(context, text, x, y, maxWidth, lineHeight) {
 }
 
 initHTML();
-
-let canvas = document.getElementById("title_canvas");
-canvas.setAttribute('width', 700);
-canvas.setAttribute('height', 700);
-let w_sample = canvas.width / 2 >> 0;
-let h_sample = canvas.height / 3 >> 0;
-let globalWidth = canvas.width;
-
-let text = getQuote();
+const w_sample = document.getElementById("title_canvas").width / 2 >> 0;
+const h_sample = document.getElementById("title_canvas").height / 3 >> 0;
+const globalWidth = document.getElementById("title_canvas").width;
 
 
+let text = '';
+getQuote();
+// (async  => {
+//     text = getQuote();
+// })();
 
-// $.getScript("js/quote.js",function(){
-//    console.log(getQuote());
+// getQuote().then(data => {
+//    text = data.quoteText;
 // });
+// $.getScript("js/quote.js",function(){
+// //    text =getQuote();
+// // });
 
+// let canvas = document.getElementById("title_canvas");
+// canvas.setAttribute('width', 700);
+// canvas.setAttribute('height', 700);
+// let w_sample = canvas.width / 2 >> 0;
+// let h_sample = canvas.height / 3 >> 0;
+// let globalWidth = canvas.width;
+
+
+async function getQuote() {
+    const endpoint2 = 'https://api.forismatic.com/api/1.0/?method=getQuote&lang=ru&format=json';
+    const proxyurl = "https://cors-anywhere.herokuapp.com/";
+    const response = await  fetch(proxyurl + endpoint2);
+    const data = await response.json();
+    getLines(document.getElementById("title_canvas").getContext("2d"),data.quoteText,18,0 + 100,0 + 200,globalWidth,100);
+    return data.quoteText;
+}
 // var x = 0, y = 0;
 // drawImgFromUnsplash("https://source.unsplash.com/400x400?sig=" + Math.random(), x, y, 0);
 // drawImgFromUnsplash("https://source.unsplash.com/400x400?sig=" + Math.random(), x+w_sample, y, 0);
