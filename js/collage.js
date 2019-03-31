@@ -11,7 +11,6 @@
 let seed = 3123;
 function random() {
     let x = Math.sin(++seed) * 10000;
-    seed+=50;
     return x - (x>>0);
 }
 
@@ -51,7 +50,7 @@ function initHTML() {
         } else {
             //other browsers
             link.href = saveCanvas();
-            link.download = "collage" + Math.random()* (9) + 1 + ".png" ;
+            link.download = "collage" + (( Math.random()* (9) + 1)>>0) + ".png" ;
             document.body.appendChild( link );
             link.click();
             document.body.removeChild( link );
@@ -93,7 +92,7 @@ function drawImageScaled(  x, y, fullwidth) {
 }
 
 function delay() {
-    return new Promise(resolve => setTimeout(resolve, 1200));
+    return new Promise(resolve => setTimeout(resolve, 900));
 }
 /*
 	Collage section setup
@@ -124,6 +123,7 @@ async function buildCollage() {
                 //     }));
                 // await delay();
                 drawImgFromUnsplash(src+ random()*i, x, y, 1);
+                await delay();
                 break;
             }
             drawImgFromUnsplash(src+ random()*i, x, y, 0);
@@ -143,9 +143,9 @@ function drawImgFromUnsplash(src, x, y, fullwidth) {
     image.src = src;
 }
 
-function setWords(context, text, font, x,y, lineHeight ) {
+function setWords(context, text, font,color, x,y, lineHeight ) {
     context.font =font + 'px serif';
-    context.fillStyle = "#FFFFFF";
+    context.fillStyle = color;
     let r = wrapWords(context,text,x);
     renderWordWrapRows(document.getElementById("title_canvas").getContext("2d"),r,lineHeight,y,x);
 }
@@ -193,8 +193,6 @@ const h_sample = document.getElementById("title_canvas").height / 3 >> 0;
 const globalWidth = document.getElementById("title_canvas").width;
 const globalHeigth = document.getElementById("title_canvas").height;
 
-let text = '';
-
 // $.getScript("js/quote.js",function(){
 // //    text =getQuote();
 // // });
@@ -206,7 +204,7 @@ async function getQuote() {
     const response = await  fetch(proxyurl + endpoint2);
     const data = await response.json();
     // getLines(document.getElementById("title_canvas").getContext("2d"),data.quoteText,18,0 + 100,0 + 100,500,20);
-    setWords(document.getElementById("title_canvas").getContext("2d"),data.quoteText,50,20,170,40);
+    setWords(document.getElementById("title_canvas").getContext("2d"),data.quoteText,50,"#FFFFFF",20,170,40);
     // return data.quoteText;
 }
 
